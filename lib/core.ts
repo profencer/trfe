@@ -10,4 +10,4 @@ export const JsonRpcRequestValidator = obj({
 // OMG TS NEEDS THIS TO INFER TYPE CORRECTLY
 // TRY USING VALIDATOR WITHOUT THIS LOL
 export const hax = <T>(t: T) => t;
-interface AbstractApi {}
+

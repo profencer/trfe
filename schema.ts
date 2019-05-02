@@ -5,5 +5,9 @@ interface Api {
         c: String, 
         d: Array<Int32>, 
         f: { a: Int32 },
-    ): Promise<Int32>;
+    ): {
+        x: Int32,
+        y: String,
+        z: Bool,
+    };
 }
