@@ -1,6 +1,5 @@
 import { createHandler, Api } from "./generated-server";
-import WS from 'ws';
-import { JsonRpcRequestValidator } from "./lib";
+import { createServer } from "./lib/server";
 // import { parse } from '@babel/parser';
 // import traverse from '@babel/traverse';
 // import generate from '@babel/generator';
@@ -36,5 +35,6 @@ const api: Api = {
     async sub(params) {
         return { x: 1, y: 'lol', z: false }
     }
-}
+};
 const handler = createHandler(api);
+const server = createServer(handler, { port: 3000 });

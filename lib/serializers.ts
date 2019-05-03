@@ -53,6 +53,6 @@ const withExt = (s: FormatDescriptors): FormatDescriptors & FormatDescriptorsExt
     int32: satisfy(s.num, (n: number) => n === ~~n),
 });
 
-export const makeDeserializer = <T>(f: (ds: FormatDescriptors & FormatDescriptorsExt) => T) => {
+export const makeSerializer = <T>(f: (ds: FormatDescriptors & FormatDescriptorsExt) => T) => {
     return f(withExt(Deserializers));
 }

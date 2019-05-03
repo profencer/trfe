@@ -1,3 +1,18 @@
+import { Serializer, makeSerializer } from "./serializers";
+import { Deserializer, makeDeserializer } from "./deserializers";
+import { Json } from "./core";
+import WS from 'ws';
+
+
+export const JsonRpcResponseDeserializer = makeDeserializer(t => t.obj({
+    requestId: t.num,
+    result: t.id,
+}));
+export const JsonRpcRequestSerializer = makeSerializer(t => t.obj({
+    functionId: t.num,
+    requestId: t.num,
+    params: t.id,
+}));
 
 export type SendRequest = <T, U>(
     functionId: number,

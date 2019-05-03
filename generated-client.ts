@@ -1,4 +1,8 @@
-import { hax, SendRequest, makeDeserializer, makeSerializer, createRequestSender } from "./lib";
+import { SendRequest, createRequestSender } from "./lib/client";
+import { makeSerializer } from "./lib/serializers";
+import { hax } from "./lib/core";
+import { makeDeserializer } from "./lib/deserializers";
+
 
 const createApi = (sendRequest: SendRequest) => {
     const sub = sendRequest(

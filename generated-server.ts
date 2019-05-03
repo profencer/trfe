@@ -1,4 +1,7 @@
-import { hax, JsonRpcRequestValidator, Json, makeDeserializer, makeSerializer, JsonRpcResponseSerializer } from "./lib";
+import { hax, Json } from "./lib/core";
+import { makeSerializer } from "./lib/serializers";
+import { makeDeserializer } from "./lib/deserializers";
+import { JsonRpcRequestValidator, JsonRpcResponseSerializer } from "./lib/server";
 
 export interface Api {
     sub(
