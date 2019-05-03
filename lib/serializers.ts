@@ -1,78 +1,49 @@
-import { Json } from "./core";
+import { Json, JsonMap } from "./core";
 
-export type Deserializer<T> = (input: T) => Json;
+export type Serializer<T> = (input: T) => Json;
 
 interface FormatDescriptors {
-    str: Deserializer<string>,
-    num: Deserializer<number>,
-    bool: Deserializer<boolean>,
-    arr<T>(elementSerializer: Deserializer<T>): Deserializer<Array<T>>,
-    obj<O>(validators: { [K in keyof O]: Deserializer<O[K]> }): Deserializer<O>,
-    id: Deserializer<Json>,
+    str: Serializer<string>,
+    num: Serializer<number>,
+    bool: Serializer<boolean>,
+    arr<T>(elementSerializer: Serializer<T>): Serializer<Array<T>>,
+    obj<O>(serializers: { [K in keyof O]: Serializer<O[K]> }): Serializer<O>,
+    id: Serializer<Json>,
 }
 
 interface FormatDescriptorsExt {
-    satisfy<T>(deserializer: Deserializer<T>, test: (t: T) => boolean): Deserializer<T>,
-    exactString(s: string): (input: Json) => string,
-    int32(input: Json): number,
+    satisfy<T>(serializer: Serializer<T>, test: (t: T) => boolean): Serializer<T>,
+    exactString(s: string): Serializer<string>,
+    int32: Serializer<number>,
 }
 
 const Deserializers: FormatDescriptors = {
     str(input) {
-        if (typeof input !== 'string') {
-            throw new Error('Input should be string!');
-        } else {
-            return input;
-        }
+        return input;
     },
     bool(input) {
-        if (typeof input !== 'boolean') {
-            throw new Error('Input should be string!');
-        } else {
-            return input;
-        }
+        return input;
     },
     num(input) {
-        if (typeof input !== 'number') {
-            throw new Error('Input should be number!');
-        } else {
-            return input;
-        }
+        return input;
     },
-    arr<T>(elementValidator: (input: Json) => T): (input: Json) => T[] {
+    arr<T>(elementSerializer: Serializer<T>): Serializer<T[]> {
+        return (input) => input.map(elementSerializer);
+    },
+    obj<O>(serializers: { [K in keyof O]: Serializer<O[K]> }): Serializer<O> {
         return (input) => {
-            if (!Array.isArray(input)) {
-                throw new Error('Input should be array!');
-            } else {
-                try {
-                    input.forEach((el) => elementValidator(el))
-                    return (input as unknown) as T[];
-                }
-                catch (e) {
-                    throw new Error('Array elements should be of other type!');
-                }
-            }
+            return Object.keys(serializers).reduce((current: JsonMap, key: string) => {
+                return { ...current, [key]: (serializers as any)[key]((input as any)[key]) } as JsonMap;
+            }, {} as JsonMap);
         };
     },
-    obj<O>(validators: { [K in keyof O]: (input: Json) => O[K] }): (input: Json) => O {
-        return (input) => {
-            if (typeof input !== 'object' && !Array.isArray(input)) {
-                throw new Error('Input should be object');
-            } else {
-                return Object.keys(validators).reduce((current: O, key: string) => {
-                    return { ...current, [key]: (validators as any)[key]((input as any)[key]) } as O;
-                }, {} as O);
-            }
-        };
-    },
-    id(input){ return input; }
+    id(input) { return input; }
 }
-export const satisfy = <T>(validator: (input: Json) => T, test: (t: T) => boolean) => (input: Json): T => {
-    const res = validator(input);
-    if (!test(res)) {
+export const satisfy = <T>(serializer: Serializer<T>, test: (t: T) => boolean) => (input: T): Json => {
+    if (!test(input)) {
         throw new Error('Input does not satisfy provided test');
     } else {
-        return res;
+        return serializer(input);
     }
 }
 const withExt = (s: FormatDescriptors): FormatDescriptors & FormatDescriptorsExt => ({
