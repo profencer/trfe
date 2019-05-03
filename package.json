@@ -19,9 +19,11 @@
     "@types/babel__generator": "^7.0.2",
     "@types/babel__template": "^7.0.2",
     "@types/babel__traverse": "^7.0.6",
+    "@types/ws": "^6.0.1",
     "mz": "^2.7.0",
     "ts-node": "^8.1.0",
-    "typescript": "^3.4.5"
+    "typescript": "^3.4.5",
+    "ws": "^7.0.0"
   },
   "devDependencies": {
     "@types/mz": "0.0.32"

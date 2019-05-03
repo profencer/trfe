@@ -1,6 +1,6 @@
-import { obj, exactString, num, id, bool, str, arr } from "./lib/validators";
-import { hax, JsonRpcRequestValidator } from "./lib/core";
-interface Api {
+import { hax, JsonRpcRequestValidator, Json, makeDeserializer, makeSerializer, JsonRpcResponseSerializer } from "./lib";
+
+export interface Api {
     sub(
         params: {
             a: number,
@@ -9,37 +9,39 @@ interface Api {
             d: number[],
             f: { a: number },
         }
-    ): Promise<number>
+    ): Promise<{
+        x: number,
+        y: string,
+        z: boolean,
+    }>
+}
+const subParamsValidator = makeDeserializer(t => t.obj({
+    a: t.num,
+    b: t.bool,
+    c: t.str,
+    d: hax(t.arr(t.num)),
+    f: hax(t.obj({ a: t.num })),
+}));
+const subResultSerializer = makeSerializer(t => t.obj({
+    x: t.num,
+    y: t.str,
+    z: t.bool,
+}));
+
+const sub = async (api: Api, rawParams: Json) => {
+    const params = subParamsValidator(rawParams);
+    return subResultSerializer(await api.sub(params));
 }
 
-const subParamsValidator = obj({
-    a: num,
-    b: bool,
-    c: str,
-    d: hax(arr(num)),
-    f: hax(obj({ a: num })),
-});
-// const subResultSerializer = obj({
-//     a: num,
-//     b: bool,
-//     c: str,
-//     d: hax(arr(num)),
-//     f: hax(obj({ a: num })),
-// }).serializer
-const sub = (api: Api, rawParams: any) => {
-    const params = subParamsValidator(rawParams);
-    return JSON.stringify(api.sub(params));
-}
-const handlers: {[key: number]: (api: Api, rawParams: any) => string} = {
+const handlers: { [key: number]: (api: Api, rawParams: Json) => Promise<Json> } = {
     1: sub,
 };
-export const createHandler = (api: Api) => (reqBody: string) => {
-    try {
-        const req = JsonRpcRequestValidator(JSON.parse(reqBody));
-        const handler = handlers[req.procedureId](api, req.params);
-    } catch (e) {
-        return () => {
-            console.log('Provided message was in bad format')
-        }
-    }
+
+export const createHandler = (api: Api) => async (reqBody: string) => {
+    const req = JsonRpcRequestValidator(JSON.parse(reqBody));
+    const result = await handlers[req.functionId](api, req.params);
+    return JSON.stringify(JsonRpcResponseSerializer({
+        requestId: req.requestId,
+        result,
+    }));
 } 
