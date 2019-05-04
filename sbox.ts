@@ -1,0 +1,17 @@
+import { Ids, Type } from "./lib/hkt";
+
+// export interface IdToHkt<T> { }
+// export type Ids = keyof IdToHkt<any>
+// export type Type<Id extends Ids, A> = Id extends Ids ? IdToHkt<A>[Id] : any
+type TT<A extends Ids, B> = Type<A, B>;
+interface I<H> {
+    fun: <T>(
+        paramsFormat: <G extends Ids>(t: G) => TT<G, T>,
+    ) => void,
+}
+
+const i: I<number> = {
+    fun: <T>(
+        paramsFormat: <G extends Ids>(t: G) => TT<G, T>,
+    ) => {}
+}

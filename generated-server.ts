@@ -1,11 +1,7 @@
 import { hax, Json, AsyncFunction } from "./lib/core";
-import { requestFormat, responseFormat } from "./lib/json-rpc-types";
 import { serializers, Serializer } from "./lib/serializers";
 import { deserializers, Deserializer } from "./lib/deserializers";
 import { subResult, subParams } from "./generated-types";
-import { FormatDescriptors } from "./lib/format-descriptors";
-
-
 
 
 type F<T> = (handler: T) => { [key: number]: AsyncFunction<Json, Json> }
@@ -18,7 +14,6 @@ interface ApiDescription {
         resultSerializer: Serializer<U>,
     ) => F<AsyncFunction<T, U>>,
 }
-
 
 const description: ApiDescription = {
     iface: <O>(o: { [K in keyof O]: F<O[K]> }) => {
@@ -53,4 +48,4 @@ const createApi = (p: ApiDescription) => {
     }))
 };
 
-export const server = api(createApi(description));
+export const server = createApi(description);

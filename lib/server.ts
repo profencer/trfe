@@ -1,4 +1,7 @@
 import WS from 'ws';
+import { requestFormat, responseFormat } from './json-rpc-types';
+import { deserializers } from './deserializers';
+import { serializers } from './serializers';
 
 const requestDeserializer = requestFormat(deserializers);
 const responseSerializer = responseFormat(serializers);
