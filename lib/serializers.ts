@@ -1,23 +1,16 @@
 import { Json, JsonMap } from "./core";
+import { FormatDescriptors } from "./format-descriptors";
 
 export type Serializer<T> = (input: T) => Json;
+export type SerializerId = 'Serializer';
 
-interface FormatDescriptors {
-    str: Serializer<string>,
-    num: Serializer<number>,
-    bool: Serializer<boolean>,
-    arr<T>(elementSerializer: Serializer<T>): Serializer<Array<T>>,
-    obj<O>(serializers: { [K in keyof O]: Serializer<O[K]> }): Serializer<O>,
-    id: Serializer<Json>,
+declare module './hkt' {
+    interface IdToHkt<T> {
+        Serializer: Serializer<T>,
+    }
 }
 
-interface FormatDescriptorsExt {
-    satisfy<T>(serializer: Serializer<T>, test: (t: T) => boolean): Serializer<T>,
-    exactString(s: string): Serializer<string>,
-    int32: Serializer<number>,
-}
-
-const Deserializers: FormatDescriptors = {
+export const serializers: FormatDescriptors<SerializerId> = {
     str(input) {
         return input;
     },
@@ -37,22 +30,16 @@ const Deserializers: FormatDescriptors = {
             }, {} as JsonMap);
         };
     },
-    id(input) { return input; }
-}
-export const satisfy = <T>(serializer: Serializer<T>, test: (t: T) => boolean) => (input: T): Json => {
-    if (!test(input)) {
-        throw new Error('Input does not satisfy provided test');
-    } else {
-        return serializer(input);
-    }
-}
-const withExt = (s: FormatDescriptors): FormatDescriptors & FormatDescriptorsExt => ({
-    ...s,
-    satisfy,
-    exactString: (label: string) => satisfy(s.str, (input: string) => input === label),
-    int32: satisfy(s.num, (n: number) => n === ~~n),
-});
-
-export const makeSerializer = <T>(f: (ds: FormatDescriptors & FormatDescriptorsExt) => T) => {
-    return f(withExt(Deserializers));
-}
+    id(input) {
+        return input;
+    },
+    satisfy<T>(serializer: Serializer<T>, test: (t: T) => boolean) {
+        return (input: T): Json => {
+            if (!test(input)) {
+                throw new Error('Input does not satisfy provided test');
+            } else {
+                return serializer(input);
+            }
+        };
+    },
+};

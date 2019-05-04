@@ -1,23 +1,16 @@
 import { Json } from "./core";
+import { FormatDescriptors } from "./format-descriptors";
 
 export type Deserializer<T> = (input: Json) => T;
+export type DeserializerId = 'Deserializer';
 
-interface FormatDescriptors {
-    str: Deserializer<string>,
-    num: Deserializer<number>,
-    bool: Deserializer<boolean>,
-    arr<T>(elementSerializer: Deserializer<T>): Deserializer<Array<T>>,
-    obj<O>(validators: { [K in keyof O]: Deserializer<O[K]> }): Deserializer<O>,
-    id: Deserializer<Json>,
+declare module './hkt' {
+    interface IdToHkt<T> {
+        Deserializer: Deserializer<T>,
+    }
 }
 
-interface FormatDescriptorsExt {
-    satisfy<T>(deserializer: Deserializer<T>, test: (t: T) => boolean): Deserializer<T>,
-    exactString(s: string): (input: Json) => string,
-    int32(input: Json): number,
-}
-
-const Deserializers: FormatDescriptors = {
+export const deserializers: FormatDescriptors<DeserializerId> = {
     str(input) {
         if (typeof input !== 'string') {
             throw new Error('Input should be string!');
@@ -65,23 +58,17 @@ const Deserializers: FormatDescriptors = {
             }
         };
     },
-    id(input){ return input; }
-}
-export const satisfy = <T>(validator: (input: Json) => T, test: (t: T) => boolean) => (input: Json): T => {
-    const res = validator(input);
-    if (!test(res)) {
-        throw new Error('Input does not satisfy provided test');
-    } else {
-        return res;
-    }
-}
-const withExt = (s: FormatDescriptors): FormatDescriptors & FormatDescriptorsExt => ({
-    ...s,
-    satisfy,
-    exactString: (label: string) => satisfy(s.str, (input: string) => input === label),
-    int32: satisfy(s.num, (n: number) => n === ~~n),
-});
-
-export const makeDeserializer = <T>(f: (ds: FormatDescriptors & FormatDescriptorsExt) => T) => {
-    return f(withExt(Deserializers));
-}
+    id(input) {
+        return input;
+    },
+    satisfy<T>(validator: (input: Json) => T, test: (t: T) => boolean) {
+        return (input: Json): T => {
+            const res = validator(input);
+            if (!test(res)) {
+                throw new Error('Input does not satisfy provided test');
+            } else {
+                return res;
+            }
+        };
+    },
+};

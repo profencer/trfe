@@ -1,4 +1,5 @@
-export interface JsonMap extends Array<Json> { }
-export type Json = { [member: string]: Json } | JsonMap | string | number | boolean | null;
+export interface JsonArray extends Array<Json> { }
+export type JsonMap = { [member: string]: Json }
+export type Json = JsonMap | JsonArray | string | number | boolean | null;
 
 export const hax = <T>(t: T) => t;
