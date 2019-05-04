@@ -6,8 +6,7 @@ import { subResult, subParams } from "./generated-types";
 import { FormatDescriptors } from "./lib/format-descriptors";
 
 
-const requestDeserializer = requestFormat(deserializers);
-const responseSerializer = responseFormat(serializers);
+
 
 type F<T> = (handler: T) => { [key: number]: AsyncFunction<Json, Json> }
 
@@ -18,8 +17,8 @@ interface ApiDescription {
         paramsDeserializer: Deserializer<T>,
         resultSerializer: Serializer<U>,
     ) => F<AsyncFunction<T, U>>,
-    api: <T>(handler: F<T>) => (api: T) => AsyncFunction<string, string>,
 }
+
 
 const description: ApiDescription = {
     iface: <O>(o: { [K in keyof O]: F<O[K]> }) => {
@@ -42,33 +41,16 @@ const description: ApiDescription = {
             };
         };
     },
-    api: <T>(handler: F<T>) => {
-        return (api: T) => {
-            const concreteApi = handler(api);
-            return async (reqBody: string) => {
-                const req = requestDeserializer(JSON.parse(reqBody));
-                const result = await concreteApi[req.functionId](req.params);
-                return JSON.stringify(
-                    responseSerializer({
-                        requestId: req.requestId,
-                        result,
-                    })
-                );
-            };
-        };
-    },
 };
 
-const createApi = (p: ApiDescription) => (api: Api) => {
-    return p.api(
-        p.iface(hax({
-            sub: p.fun(
-                1,
-                subParams(deserializers),
-                subResult(serializers),
-            ),
-        }))
-    );
+const createApi = (p: ApiDescription) => {
+    return p.iface(hax({
+        sub: p.fun(
+            1,
+            subParams(deserializers),
+            subResult(serializers),
+        ),
+    }))
 };
 
-export const server = createApi(description);
+export const server = api(createApi(description));
