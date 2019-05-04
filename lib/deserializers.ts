@@ -11,21 +11,21 @@ declare module './hkt' {
 }
 
 export const deserializers: FormatDescriptors<DeserializerId> = {
-    str(input) {
+    str(input: Json) {
         if (typeof input !== 'string') {
             throw new Error('Input should be string!');
         } else {
             return input;
         }
     },
-    bool(input) {
+    bool(input: Json) {
         if (typeof input !== 'boolean') {
             throw new Error('Input should be string!');
         } else {
             return input;
         }
     },
-    num(input) {
+    num(input: Json) {
         if (typeof input !== 'number') {
             throw new Error('Input should be number!');
         } else {
@@ -58,7 +58,7 @@ export const deserializers: FormatDescriptors<DeserializerId> = {
             }
         };
     },
-    id(input) {
+    id(input: Json) {
         return input;
     },
     satisfy<T>(validator: (input: Json) => T, test: (t: T) => boolean) {

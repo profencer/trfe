@@ -1,18 +1,11 @@
-import { Serializer, makeSerializer } from "./serializers";
-import { Deserializer, makeDeserializer } from "./deserializers";
+import { Serializer, serializers } from "./serializers";
+import { Deserializer, deserializers} from "./deserializers";
 import { Json } from "./core";
 import WS from 'ws';
+import { requestFormat, responseFormat } from "./json-rpc-types";
 
-
-export const JsonRpcResponseDeserializer = makeDeserializer(t => t.obj({
-    requestId: t.num,
-    result: t.id,
-}));
-export const JsonRpcRequestSerializer = makeSerializer(t => t.obj({
-    functionId: t.num,
-    requestId: t.num,
-    params: t.id,
-}));
+const requestSerializer = requestFormat(serializers);
+const responseDeserializer = responseFormat(deserializers);
 
 export type SendRequest = <T, U>(
     functionId: number,
@@ -24,7 +17,7 @@ export const createWebSocketClient = (connection: WS) => {
     let requestId: number = 0;
     const responseHandlers: { [key: string]: (input: Json) => void } = {}
     connection.on('message', (rawMsg: string) => {
-        const msg = JsonRpcResponseDeserializer(JSON.parse(rawMsg));
+        const msg = responseDeserializer(JSON.parse(rawMsg));
         responseHandlers[msg.requestId](msg.result);
         delete responseHandlers[msg.requestId];
     });
@@ -37,7 +30,8 @@ export const createWebSocketClient = (connection: WS) => {
             requestId += 1;
             connection.send(
                 JSON.stringify(
-                    JsonRpcRequestSerializer({
+                    requestSerializer
+                    ({
                         functionId,
                         requestId,
                         params: paramsSerializer(params),

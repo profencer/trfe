@@ -11,13 +11,13 @@ declare module './hkt' {
 }
 
 export const serializers: FormatDescriptors<SerializerId> = {
-    str(input) {
+    str(input: string) {
         return input;
     },
-    bool(input) {
+    bool(input: boolean) {
         return input;
     },
-    num(input) {
+    num(input: number){
         return input;
     },
     arr<T>(elementSerializer: Serializer<T>): Serializer<T[]> {
@@ -30,7 +30,7 @@ export const serializers: FormatDescriptors<SerializerId> = {
             }, {} as JsonMap);
         };
     },
-    id(input) {
+    id(input: Json) {
         return input;
     },
     satisfy<T>(serializer: Serializer<T>, test: (t: T) => boolean) {
