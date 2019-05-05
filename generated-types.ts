@@ -1,16 +1,16 @@
 import { Ids } from "./lib/hkt";
 import { FormatDescriptors } from "./lib/format-descriptors";
-
-export const subParams = <F extends Ids>(t: FormatDescriptors<F>) => t.obj({
-    a: t.num,
-    b: t.bool,
-    c: t.str,
-    d: t.arr(t.num),
-    f: t.obj({ a: t.num }),
+export const subParams = <F extends Ids>(p: FormatDescriptors<F>) => p.obj({
+  a: p.num,
+  b: p.bool,
+  c: p.str,
+  d: p.arr(p.num),
+  f: p.obj({
+    a: p.num
+  })
 });
-
-export const subResult = <F extends Ids>(t: FormatDescriptors<F>) => t.obj({
-    x: t.num,
-    y: t.str,
-    z: t.bool,
+export const subResult = <F extends Ids>(p: FormatDescriptors<F>) => p.obj({
+  x: p.num,
+  y: p.str,
+  z: p.bool
 });

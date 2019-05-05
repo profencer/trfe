@@ -24,3 +24,6 @@ class B extends A {
     m<T, U>(t: T, u: U) { } 
 //  ﹋ error
 }
+const compose = <A, B, C>(f: (a: A) => B, g: (b: B) => C) => (a: A): C => g(f(a));
+const id = <A>(a: A): A => a;
+const fuck = compose(id, id);
