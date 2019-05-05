@@ -215,7 +215,7 @@ const generateParams = (params: (t.Identifier | t.Pattern | t.RestElement | t.TS
         if(!decorators || decorators.length != 1){
             throw new Error();
         }
-        const decoratorExpression = decorators[0].expression
+        const decoratorExpression = decorators[0].expression;
         if(!t.isCallExpression(decoratorExpression)){
             throw new Error();
         }
