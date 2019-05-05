@@ -1,5 +1,5 @@
-import { client } from './generated-client';
 import { createWsConnection, createConnection } from './lib/client';
+import { client } from './generated/client';
 
 const main = async () => {
     const api = await client(createConnection(await createWsConnection('ws://127.0.0.1:3000')));

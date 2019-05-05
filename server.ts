@@ -1,5 +1,5 @@
 import { createServer, createServer2 } from "./lib/server";
-import { server } from "./generated-server";
+import { server } from "./generated/server";
 
 createServer(createServer2(server)({
     async sub(params) {

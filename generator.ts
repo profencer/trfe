@@ -1,39 +1,8 @@
 import { parse } from '@babel/parser';
-import traverse from '@babel/traverse';
 import generate from '@babel/generator';
 import * as t from '@babel/types';
 import tpl from '@babel/template';
 import fs from 'mz/fs';
-// TODO
-// 1. generated-types.ts + 
-// 2. generated-client.ts 
-// 3. generated-server.ts +
-// 
-// плагин бабеля - это настройки для traverse
-// const typeSchemaTpl = tpl`
-//     export const NAME = <F extends Ids>(t: FormatDescriptors<F>) => BODY;
-// `;
-
-// import { serializers } from "./lib/serializers";
-// import { deserializers } from "./lib/deserializers";
-// import { hax } from "./lib/core";
-// import { ApiDescription, clientDesc } from "./lib/client";
-
-// import { subResult, subParams } from "./generated-types";
-
-// const createApi = (p: ApiDescription) => {
-//     return p.iface(hax({
-//         sub: p.fun(
-//             1,
-//             subParams(serializers),
-//             subResult(deserializers),
-//         ),
-//     }))
-// };
-
-// export const client = createApi(clientDesc);
-
-// export const server = createApi(serverDesc);
 
 const typedIdentifier = (name: string, type: t.TSType) => {
     const i = t.identifier(name);
@@ -46,19 +15,19 @@ const importTpl = (what: string, from: string) => t.importDeclaration([
 ], t.stringLiteral(from))
 
 const serverImportTpl = () => [
-    importTpl('hax', './lib/core'),
-    importTpl('serializers', './lib/serializers'),
-    importTpl('deserializers', './lib/deserializers'),
-    importTpl('serverDesc', './lib/server'),
-    importTpl('ApiDescription', './lib/server'),
+    importTpl('hax', '../lib/core'),
+    importTpl('serializers', '../lib/serializers'),
+    importTpl('deserializers', '../lib/deserializers'),
+    importTpl('serverDesc', '../lib/server'),
+    importTpl('ApiDescription', '../lib/server'),
 ];
 
 const clientImportTpl = () => [
-    importTpl('hax', './lib/core'),
-    importTpl('serializers', './lib/serializers'),
-    importTpl('deserializers', './lib/deserializers'),
-    importTpl('clientDesc', './lib/client'),
-    importTpl('ApiDescription', './lib/client'),
+    importTpl('hax', '../lib/core'),
+    importTpl('serializers', '../lib/serializers'),
+    importTpl('deserializers', '../lib/deserializers'),
+    importTpl('clientDesc', '../lib/client'),
+    importTpl('ApiDescription', '../lib/client'),
 ];
 
 
@@ -98,8 +67,8 @@ const createApiTpl = (funcs: ObjAst) => t.variableDeclaration('const', [
 ]);
 
 const typesImportTpl = () => [
-    importTpl('Ids', './lib/hkt'),
-    importTpl('FormatDescriptors', './lib/format-descriptors'),
+    importTpl('Ids', '../lib/hkt'),
+    importTpl('FormatDescriptors', '../lib/format-descriptors'),
 ];
 
 // завести баги на бабель 
@@ -246,8 +215,8 @@ const generateParams = (params: (t.Identifier | t.Pattern | t.RestElement | t.TS
         const methodName = x.name;
         const paramsName = `${methodName}Params`;
         const resultName = `${methodName}Result`;
-        schemaImports.push(importTpl(paramsName, './generated-types'));
-        schemaImports.push(importTpl(resultName, './generated-types'));
+        schemaImports.push(importTpl(paramsName, './types'));
+        schemaImports.push(importTpl(resultName, './types'));
         serverFunctions[methodName] = serverFunTpl({
             FUNID: t.numericLiteral(1),
             METHOD1: t.identifier(paramsName),
@@ -274,26 +243,9 @@ const generateParams = (params: (t.Identifier | t.Pattern | t.RestElement | t.TS
         createApiTpl(clientFunctions),
         clientExportTpl()
     ]);
+
     // раазобраться с индетацией
-    await fs.writeFile('generated-client.ts', generate(clientCode).code);
-
-    await fs.writeFile('generated-server.ts', generate(serverCode).code);
-    await fs.writeFile('generated-types.ts', generate(t.program(result)).code);
-    // traverse(ast, {
-    //     enter(path) {
-    //         if (path.isIdentifier() && path.parent.type === 'TSInterfaceDeclaration' && path.parent.id === path.node) {
-    //             path.replaceWith(t.identifier('HOOY'));
-    //             path.stop();
-    //         }
-    //     }, 
-    //     exit(path) {
-    //         // так тоже бывает
-    //     }
-    // });
-
-
-
-
-    debugger;
-    // console.log(generate(ast).code);
+    await fs.writeFile('generated/client.ts', generate(clientCode).code);
+    await fs.writeFile('generated/server.ts', generate(serverCode).code);
+    await fs.writeFile('generated/types.ts', generate(t.program(result)).code);
 })();
