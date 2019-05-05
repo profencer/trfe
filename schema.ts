@@ -32,5 +32,12 @@ class Api {
         x: Int32,
         y: String,
         z: Bool,
-    };
+    }
+    @id(2)
+    add(
+        a: Int32,
+        b: Int32,
+    ): {
+        result: Int32,
+    }
 }

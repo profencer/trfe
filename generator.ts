@@ -211,19 +211,35 @@ const generateParams = (params: (t.Identifier | t.Pattern | t.RestElement | t.TS
         if (x.type !== 'Identifier') {
             throw new Error();
         }
-
+        const decorators = elem.decorators;
+        if(!decorators || decorators.length != 1){
+            throw new Error();
+        }
+        const decoratorExpression = decorators[0].expression
+        if(!t.isCallExpression(decoratorExpression)){
+            throw new Error();
+        }
+        const decoratorArguments = decoratorExpression.arguments;
+        if(decoratorArguments.length !== 1){
+            throw new Error();
+        }
+        const functionId = decoratorArguments[0];
+        if(!t.isNumericLiteral(functionId)) {
+            throw new Error();
+        }
+        
         const methodName = x.name;
         const paramsName = `${methodName}Params`;
         const resultName = `${methodName}Result`;
         schemaImports.push(importTpl(paramsName, './types'));
         schemaImports.push(importTpl(resultName, './types'));
         serverFunctions[methodName] = serverFunTpl({
-            FUNID: t.numericLiteral(1),
+            FUNID: functionId,
             METHOD1: t.identifier(paramsName),
             METHOD2: t.identifier(resultName),
         });
         clientFunctions[methodName] = clientFunTpl({
-            FUNID: t.numericLiteral(1),
+            FUNID: functionId,
             METHOD1: t.identifier(paramsName),
             METHOD2: t.identifier(resultName),
         });
