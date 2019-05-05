@@ -23,7 +23,7 @@ const description: ApiDescription<F> = {
             return { ...res, [key]: (o as any)[key](c) };
         }, {} as O);
     },
-    fun: <T, U>(
+    fun: (<T, U>(
         functionId: number,
         paramsFormat: <G extends Ids>(t: FormatDescriptors<G>) => Type<G, T>,
         resultFormat: <G extends Ids>(t: FormatDescriptors<G>) => Type<G, U>,
@@ -47,7 +47,7 @@ const description: ApiDescription<F> = {
         //             };
         //         });
         //     };
-        }
+        })
     },
 
 };

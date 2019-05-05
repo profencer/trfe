@@ -15,3 +15,12 @@ const i: I<number> = {
         paramsFormat: <G extends Ids>(t: G) => TT<G, T>,
     ) => {}
 }
+
+class A {
+    m<T, U extends T>(t: T, u: U) { }
+}
+
+class B extends A {
+    m<T, U>(t: T, u: U) { } 
+//  ﹋ error
+}

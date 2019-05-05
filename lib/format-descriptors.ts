@@ -18,3 +18,4 @@ export const exactString = <F extends Ids>(f: FormatDescriptors<F>) => {
 export const int32 = <F extends Ids>(f: FormatDescriptors<F>): Type<F, number> => {
     return f.satisfy(f.num, (n: number) => n === ~~n); 
 };
+
